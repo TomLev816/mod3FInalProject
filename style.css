@@ -1,0 +1,24 @@
+#sprite {
+  background-color: Tan;
+  height: 100px;
+  width: 50px;
+  position: absolute;
+}
+
+
+#gameBorder {
+  background-color: white;
+  border: solid black 10px;
+  height: 700px;
+  width: 1000px;
+  position: absolute;
+}
+
+#block {
+  background-color: black;
+  height: 40px;
+  width: 50px;
+  position: absolute;
+  bottom: 500px;
+  left: 600px;
+}
