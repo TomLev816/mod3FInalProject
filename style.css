@@ -1,6 +1,6 @@
 #sprite {
   background-color: Tan;
-  height: 100px;
+  height: 40px;
   width: 50px;
   position: absolute;
 }
@@ -21,4 +21,10 @@
   position: absolute;
   bottom: 500px;
   left: 600px;
+}
+
+#gameStats {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
 }
