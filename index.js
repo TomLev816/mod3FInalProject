@@ -1,18 +1,63 @@
 
+let level
+let character
+let sprite
+let spriteLeftEdge
+let spriteBottomEdge
+let spriteTopEdge
+let spriteRightEdge
+let tID
 
-// const moveSprite = (event) => {
-//   debugger
-// }
+let projectileArray = []
+let monstersArray = []
+let lastArrowKey = 'left'
 
-let character // local character
+document.addEventListener("DOMContentLoaded", () => {
 
-// character.weapons = ['Coffee', 'Sleep']
-let gameBorder = document.getElementById('gameBorder')
-let gameHeader = document.getElementById('gameHeader')
-let gameStats = document.getElementById('gameStats')
+  const gameBorder = document.getElementById('gameBorder')
+  const gameHeader = document.getElementById('gameHeader')
+  const gameStats = document.getElementById('gameStats')
+  // const sprite = document.getElementById('sprite')
+  let speed = 20
+  let gameInterval = 1
+  // const sprite = document.getElementById('sprite')
 
-  displayGameStats = (response) => {
-    character = response
+  fetch('http://localhost:3000/api/v1/levels/1')
+  .then(response => response.json())
+  .then(parsed => {
+    console.log(parsed)
+    level = parsed
+    gameBorder.style.background = `url("${level.background}")`
+  })
+
+
+    fetch('http://localhost:3000/api/v1/characters/1')
+    .then(response => response.json())
+    .then(responseJson => {
+      console.log(responseJson)
+      // debugger
+      character = responseJson
+      displayGameStats(responseJson)
+      sprite = document.getElementById('characterSprite')
+      // debugger
+      spriteLeftEdge = positionToInteger(sprite.style.left)
+      spriteBottomEdge = positionToInteger(sprite.style.bottom)
+      spriteTopEdge = spriteBottomEdge + 40
+      spriteRightEdge = spriteLeftEdge + 50
+      //debugger
+      return character
+    })
+
+  // function displayImg() {
+  //   let newImg = document.createElement('img')
+  //   newImg.id = 'characterSprite'
+  //   newImg.src = character.sprite_img
+  //   newImg.style.left = '100px'
+  //   newImg.style.bottom = '300px'
+  //   gameBorder.appendChild(newImg)
+  // }
+
+  function displayGameStats(response) {
     newName = document.createElement('div')
     newName.style.minWidth = '333px'
     newName.style.marginLeft = '75px'
@@ -34,188 +79,340 @@ let gameStats = document.getElementById('gameStats')
     newWeaponH2.innerText = 'weapons array'
     gameStats.appendChild(newWeapon)
     newWeapon.appendChild(newWeaponH2)
-    displayImg()
-  }
 
-  displayImg = () => {
-    let newImg = document.createElement('img')
+    newImg = document.createElement('img')
     newImg.id = 'characterSprite'
-    newImg.src = character.sprite_img
+    // newImg.src = character.sprite_img
+    newImg.style.background =  `url("${character.sprite_img}") 0px 0px`
+    newImg.style.left = '740px'
+    newImg.style.bottom = '80px'
+    newImg.style.width = '60px'
+    newImg.style.height = '38px'
+    newImg.style.position = 'absolute'
+    newImg.style.backgroundSize = 'auto'
+    // newImg.style.clip = 'rect(20px, 200px,200px,0px)'
     gameBorder.appendChild(newImg)
   }
-
-
-document.addEventListener("DOMContentLoaded", () => {
-
-
-  fetch('http://localhost:3000/api/v1/characters/1')
-    .then(response => response.json())
-    .then(responseJson => displayGameStats(responseJson))
-
-
-
-// Last line is DOMContentLoaded
-
-
-
-
-
-
-
-
-
-
-
-
-  // const sprite = document.getElementById('sprite')
-  //
-  // let spriteLeftEdge = positionToInteger(sprite.style.left)
-  // let spriteBottomEdge = positionToInteger(sprite.style.bottom)
-  // let spriteTopEdge = spriteBottomEdge + 40
-  // let spriteRightEdge = spriteLeftEdge + 50
+  // debugger
+  // sprite = document.getElementById('characterSprite')
+  // // debugger
+  // spriteLeftEdge = positionToInteger(sprite.style.left)
+  // spriteBottomEdge = positionToInteger(sprite.style.bottom)
+  // spriteTopEdge = spriteBottomEdge + 40
+  // spriteRightEdge = spriteLeftEdge + 50
   // let speed = 10
   // let gameInterval = 1
-  //
-  // // Block 1
-  // const block = document.getElementById('block')
-  // let styleBlock = getComputedStyle(block)
-  // let blockLeftEdge = positionToInteger(styleBlock.left)
-  // let blockRightEdge = positionToInteger(styleBlock.left) + 50;
-  // let blockBottomEdge = positionToInteger(styleBlock.bottom)
-  // let blockTopEdge = positionToInteger(styleBlock.bottom) + 40
-  //
-  //
+  //debugger
+  function animateScript() {
+    let position = 60
+    const interval = 100
+    const diff = 60
+
+    tID = setInterval (() => {
+      sprite.style.backgroundPosition =
+      `-${position}px 0px`
+      if (position < 184) {
+        position = position + diff
+      } else {
+        position = 60
+      }
+    }, interval)
+  }
+
+  let canMove = true
+
   document.addEventListener('keydown', event => {
     event.preventDefault()
     event.stopPropagation()
     console.log(event.which);
     switch (event.which) {
       case 37:
-        if (checkCollision() !== "stop LEFT") {
-          console.log(spriteLeftEdge)
-          console.log(spriteTopEdge, "Y");
-          moveSpriteLeft()
-        }
+      if (canMove) {
+        lastArrowKey = 'left'
+        moveSpriteLeft()
+        animateScript()
         break;
+      }
       case 38:
-        if (checkCollision() !== "stop UP") {
-          console.log(spriteLeftEdge)
-          console.log(spriteTopEdge, "Y");
-          moveSpriteUp()
-        }
+      if (canMove) {
+        lastArrowKey = 'up'
+        moveSpriteUp()
+        animateScript()
         break;
+      }
       case 39:
-        if (checkCollision() !== "stop RIGHT") {
-          console.log(spriteLeftEdge)
-          console.log(spriteTopEdge, "Y");
-          moveSpriteRight()
-        }
+      if (canMove) {
+        lastArrowKey = 'right'
+        moveSpriteRight()
+        animateScript()
         break;
+      }
       case 40:
-        if (checkCollision() !== "stop DOWN") {
-          console.log(spriteLeftEdge)
-          console.log(spriteTopEdge, "Y");
-          moveSpriteDown()
-        }
+      if (canMove) {
+        lastArrowKey = 'down'
+        moveSpriteDown()
+        animateScript()
+        break;
+      }
+      case 32:
+        console.log(event);
+        fireProjectile()
         break;
       default:
         console.log('DEFAULT');
     }
-}) end of keydown event listener
+  }) //end of keydown event listener
+  // debugger
+  function moveSpriteLeft() {
+    // let sprite = document.getElementById('spriteCharacter')
+    // let spriteBottomEdge = positionToInteger(sprite.style.bottom)
+    // let spriteLeftEdge = positionToInteger(sprite.style.left)
+    // let spriteTopEdge = spriteBottomEdge + 100
+    // let spriteRightEdge = spriteLeftEdge + 50
+    function moveLeft() {
+      sprite.style.left = `${spriteLeftEdge - speed}px`
+      spriteBottomEdge = positionToInteger(sprite.style.bottom)
+      spriteLeftEdge = positionToInteger(sprite.style.left)
+      spriteTopEdge = spriteBottomEdge + 40
+      spriteRightEdge = spriteLeftEdge + 50
+    }
+    if (gameInterval !== null && spriteLeftEdge > 50) {
+      // if (checkCollision(spriteTopEdge, spriteRightEdge) !== 'stop LEFT') {
+        // animateScript()
+        window.requestAnimationFrame(moveLeft)
+        // stopAnimate()
+      // }
+    }
+    canMove = false
+  }
+//
+//
+  function moveSpriteRight() {
+    // let sprite = document.getElementById('spriteCharacter')
+    // let spriteBottomEdge = positionToInteger(sprite.style.bottom)
+    // let spriteLeftEdge = positionToInteger(sprite.style.left)
+    // let spriteTopEdge = spriteBottomEdge + 100
+    // let spriteRightEdge = spriteLeftEdge + 50
 
-switch (event.which) {
-  case ():
-    moveRight()
+    function moveRight() {
+      sprite.style.left = `${spriteLeftEdge + speed}px`
+      spriteBottomEdge = positionToInteger(sprite.style.bottom)
+      spriteLeftEdge = positionToInteger(sprite.style.left)
+      spriteTopEdge = spriteBottomEdge + 40
+      spriteRightEdge = spriteLeftEdge + 50
+    }
+    if (gameInterval !== null && spriteLeftEdge < 790) {
+      // debugger
+      // if ((spriteRightEdge < blockLeftEdge && spriteTopEdge < blockBottomEdge) || (spriteRightEdge < blockLeftEdge && spriteBottomEdge > blockTopEdge)) {
+      // if (checkCollision(spriteTopEdge, spriteRightEdge) !== 'stop RIGHT'){
+        // animateScript()
+        window.requestAnimationFrame(moveRight)
+        // stopAnimate()
+      // } else {
+      //   console.log('wtf');
+      // }
+    }
+    canMove = false
+  }
+
+  function moveSpriteUp() {
+    // let sprite = document.getElementById('spriteCharacter')
+    // let spriteBottomEdge = positionToInteger(sprite.style.bottom)
+    // let spriteLeftEdge = positionToInteger(sprite.style.left)
+    // let spriteTopEdge = spriteBottomEdge + 100
+    // let spriteRightEdge = spriteLeftEdge + 50
+
+    function moveUp() {
+      sprite.style.bottom = `${spriteBottomEdge + speed}px`
+      spriteBottomEdge = positionToInteger(sprite.style.bottom)
+      spriteLeftEdge = positionToInteger(sprite.style.left)
+      spriteTopEdge = spriteBottomEdge + 40
+      spriteRightEdge = spriteLeftEdge + 50
+      }
+    if (gameInterval !== null && spriteBottomEdge < 820) {
+      // if (checkCollision(spriteTopEdge, spriteRightEdge) !== 'stop UP'){
+        // animateScript()
+        window.requestAnimationFrame(moveUp)
+        // stopAnimate()
+      // }
+    }
+    canMove = false
+  }
+//
+  function moveSpriteDown() {
+    // let sprite = document.getElementById('spriteCharacter')
+    // let spriteBottomEdge = positionToInteger(sprite.style.bottom)
+    // let spriteLeftEdge = positionToInteger(sprite.style.left)
+    // let spriteTopEdge = spriteBottomEdge + 100
+    // let spriteRightEdge = spriteLeftEdge + 50
+
+    function moveDown(){
+      sprite.style.bottom = `${spriteBottomEdge - speed}px`
+      spriteBottomEdge = positionToInteger(sprite.style.bottom)
+      spriteLeftEdge = positionToInteger(sprite.style.left)
+      spriteTopEdge = spriteBottomEdge + 40
+      spriteRightEdge = spriteLeftEdge + 50
+      }
+    if (gameInterval !== null && spriteBottomEdge > 20) {
+      // if (checkCollision(spriteTopEdge, spriteRightEdge) !== 'stop DOWN') {
+        // animateScript()
+        window.requestAnimationFrame(moveDown)
+        // stopAnimate()
+      // }
+    }
+    canMove = false
+  }
+
+  function positionToInteger(p) {
+    return parseInt(p.split('px')[0]) || 0
+  }
+//
+  document.addEventListener('keyup', event => {
+    stopAnimate()
+    canMove = true
+  })
+
+  function stopAnimate() {
+        clearInterval(tID);
+      }
 
 
-//   function moveSpriteLeft() {
-//     // spriteBottomEdge = positionToInteger(sprite.style.bottom)
-//     // spriteLeftEdge = positionToInteger(sprite.style.left)
-//     // let spriteTopEdge = spriteBottomEdge + 100
-//     // let spriteRightEdge = spriteLeftEdge + 50
-//
-//     function moveLeft(){
-//       sprite.style.left = `${spriteLeftEdge - speed}px`
-//       spriteBottomEdge = positionToInteger(sprite.style.bottom)
-//       spriteLeftEdge = positionToInteger(sprite.style.left)
-//       spriteTopEdge = spriteBottomEdge + 40
-//       spriteRightEdge = spriteLeftEdge + 50
-//     }
-//     if (gameInterval !== null && spriteLeftEdge > 0) {
-//       // if (checkCollision(spriteTopEdge, spriteRightEdge) !== 'stop LEFT') {
-//         window.requestAnimationFrame(moveLeft)
-//       // }
-//     }
-//   }
-//
-//
-//   function moveSpriteRight() {
-//     // spriteBottomEdge = positionToInteger(sprite.style.bottom)
-//     // spriteLeftEdge = positionToInteger(sprite.style.left)
-//     // let spriteTopEdge = spriteBottomEdge + 100
-//     // let spriteRightEdge = spriteLeftEdge + 50
-//     function moveRight(){
-//       sprite.style.left = `${spriteLeftEdge + speed}px`
-//       spriteBottomEdge = positionToInteger(sprite.style.bottom)
-//       spriteLeftEdge = positionToInteger(sprite.style.left)
-//       spriteTopEdge = spriteBottomEdge + 40
-//       spriteRightEdge = spriteLeftEdge + 50
-//     }
-//     if (gameInterval !== null && spriteLeftEdge < 945) {
-//       // debugger
-//       // if ((spriteRightEdge < blockLeftEdge && spriteTopEdge < blockBottomEdge) || (spriteRightEdge < blockLeftEdge && spriteBottomEdge > blockTopEdge)) {
-//       // if (checkCollision(spriteTopEdge, spriteRightEdge) !== 'stop RIGHT'){
-//         window.requestAnimationFrame(moveRight)
-//       // } else {
-//       //   console.log('wtf');
-//       // }
-//     }
-//   }
-//
-//   function moveSpriteUp() {
-//     // spriteBottomEdge = positionToInteger(sprite.style.bottom)
-//     // spriteLeftEdge = positionToInteger(sprite.style.left)
-//     // let spriteTopEdge = spriteBottomEdge + 100
-//     // let spriteRightEdge = spriteLeftEdge + 50
-//
-//     function moveUp(){
-//       sprite.style.bottom = `${spriteBottomEdge + speed}px`
-//       spriteBottomEdge = positionToInteger(sprite.style.bottom)
-//       spriteLeftEdge = positionToInteger(sprite.style.left)
-//       spriteTopEdge = spriteBottomEdge + 40
-//       spriteRightEdge = spriteLeftEdge + 50
-//       }
-//     if (gameInterval !== null && spriteBottomEdge < 600) {
-//       // if (checkCollision(spriteTopEdge, spriteRightEdge) !== 'stop UP'){
-//         window.requestAnimationFrame(moveUp)
-//       // }
-//     }
-//   }
-// //
-//   function moveSpriteDown() {
-//     // spriteBottomEdge = positionToInteger(sprite.style.bottom)
-//     // spriteLeftEdge = positionToInteger(sprite.style.left)
-//     // let spriteTopEdge = spriteBottomEdge + 100
-//     // let spriteRightEdge = spriteLeftEdge + 50
-//
-//     function moveDown(){
-//       sprite.style.bottom = `${spriteBottomEdge - speed}px`
-//       spriteBottomEdge = positionToInteger(sprite.style.bottom)
-//       spriteLeftEdge = positionToInteger(sprite.style.left)
-//       spriteTopEdge = spriteBottomEdge + 40
-//       spriteRightEdge = spriteLeftEdge + 50
-//       }
-//     if (gameInterval !== null && spriteBottomEdge > 0) {
-//       // if (checkCollision(spriteTopEdge, spriteRightEdge) !== 'stop DOWN') {
-//         window.requestAnimationFrame(moveDown)
-//       // }
-//     }
-//   }
-//
-//   function positionToInteger(p) {
-//     return parseInt(p.split('px')[0]) || 0
-//   }
-//
+
+// fire projectile
+
+  fireProjectile = () => {
+  if (projectileArray.length < 1){
+  let projectile = document.createElement('div')
+  let left = positionToInteger(sprite.style.left)
+  let bottom = positionToInteger(sprite.style.bottom)
+    projectile.className = 'projectile'
+    projectile.style.left = `${left + 24}px`
+    projectile.style.bottom = `${bottom + 20}px`
+    gameBorder.appendChild(projectile)
+    // debugger
+
+    if (lastArrowKey === 'up') {
+      moveProjectile = () => {
+        let currentBottom = parseInt(projectile.style.bottom)
+        // console.log(currentBottom);
+        projectile.style.bottom = `${currentBottom += 30}px`
+          if (checkForBulletHitUpDown(projectile) === 'hit') {
+            return endGame()
+            }
+        if (currentBottom < 890) {
+          window.requestAnimationFrame(moveProjectile)
+        } else {
+          projectile.remove()
+          projectileArray.pop()
+        }
+      }
+    }
+
+    if (lastArrowKey === 'down') {
+      moveProjectile = () => {
+        let currentBottom = parseInt(projectile.style.bottom)
+        // console.log(currentBottom);
+        projectile.style.bottom = `${currentBottom -= 30}px`
+          if (checkForBulletHitUpDown(projectile) === 'hit') {
+            return endGame()
+            }
+        if (currentBottom > 0) {
+          window.requestAnimationFrame(moveProjectile)
+        } else {
+          projectile.remove()
+          projectileArray.pop()
+        }
+      }
+    }
+
+    if (lastArrowKey === 'left') {
+      moveProjectile = () => {
+        let currentLeft = parseInt(projectile.style.left)
+        // console.log(currentBottom);
+        projectile.style.left = `${currentLeft -= 30}px`
+          if (checkForBulletHitLeftRight(projectile) === 'hit') {
+            return endGame()
+            }
+        if (currentLeft > 30) {
+          window.requestAnimationFrame(moveProjectile)
+        } else {
+          projectile.remove()
+          projectileArray.pop()
+        }
+      }
+    }
+    if (lastArrowKey === 'right') {
+          moveProjectile = () => {
+            let currentLeft = parseInt(projectile.style.left)
+            // console.log(currentBottom);
+            projectile.style.left = `${currentLeft += 30}px`
+              if (checkForBulletHitLeftRight(projectile) === 'hit') {
+                return endGame()
+                }
+            if (currentLeft < 860) {
+              window.requestAnimationFrame(moveProjectile)
+            } else {
+              projectile.remove()
+              projectileArray.pop()
+            }
+          }
+        }
+
+
+
+
+    window.requestAnimationFrame(moveProjectile)
+    projectileArray.push(projectile)
+    // return projectile
+    }
+  }
+
+  checkForBulletHitUpDown = () => {
+    // debugger
+    if (monstersArray.length > 0){
+      monstersArray.forEach(monster => {
+        let monsterStyle = getComputedStyle(monster)
+        let proYaxis = projectileArray[0].style.bottom
+        let proXaxis = projectileArray[0].style.left
+        if (parseInt(proYaxis) < parseInt(monsterStyle.bottom) && parseInt(monsterStyle.bottom) < parseInt(proYaxis) + 50){
+          // debugger
+          if (parseInt(monsterStyle.left)  > parseInt(proXaxis) + 10 || (parseInt(monsterStyle.left) + 50 < parseInt(proXaxis))) {
+            console.log('miss');
+          } else {
+            console.log('hit')
+            projectileArray[0].remove()
+            projectileArray.pop()
+            monster.remove()
+          }
+        }
+      })
+    } // end of if
+  }
+
+  checkForBulletHitLeftRight = () => {
+    // debugger
+    if (monstersArray.length > 0){
+      monstersArray.forEach(monster => {
+        let monsterStyle = getComputedStyle(monster)
+        let proYaxis = projectileArray[0].style.bottom
+        let proXaxis = projectileArray[0].style.left
+        if (parseInt(proXaxis) < parseInt(monsterStyle.left) && parseInt(monsterStyle.left) < parseInt(proXaxis) + 50){
+          // debugger
+          if (parseInt(monsterStyle.bottom)  > parseInt(proYaxis) + 10 || (parseInt(monsterStyle.bottom) + 50 < parseInt(proYaxis))) {
+            console.log('miss');
+          } else {
+            console.log('hit')
+            projectileArray[0].remove()
+            projectileArray.pop()
+            monster.remove()
+          }
+        }
+      })
+    } // end of if
+  }
+
+
+
 
   // const block = document.getElementById('block')
 
