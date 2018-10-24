@@ -1,6 +1,7 @@
 
 let level
 let character
+let monster
 let sprite
 let spriteLeftEdge
 let spriteBottomEdge
@@ -17,11 +18,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const gameBorder = document.getElementById('gameBorder')
   const gameHeader = document.getElementById('gameHeader')
   const gameStats = document.getElementById('gameStats')
+  const blockParent = document.querySelector('.block')
   // const sprite = document.getElementById('sprite')
   let speed = 20
   let gameInterval = 1
   // const sprite = document.getElementById('sprite')
-
+ // these fetches are for level 1
   fetch('http://localhost:3000/api/v1/levels/1')
   .then(response => response.json())
   .then(parsed => {
@@ -47,6 +49,13 @@ document.addEventListener("DOMContentLoaded", () => {
       //debugger
       return character
     })
+
+  fetch('http://localhost:3000/api/v1/monsters/1')
+  .then(response => response.json())
+  .then(parsedResponse => {
+    console.log(parsedResponse)
+    monster = parsedResponse
+  })
 
   // function displayImg() {
   //   let newImg = document.createElement('img')
@@ -79,6 +88,116 @@ document.addEventListener("DOMContentLoaded", () => {
     newWeaponH2.innerText = 'weapons array'
     gameStats.appendChild(newWeapon)
     newWeapon.appendChild(newWeaponH2)
+
+    threeTableBlock = document.createElement('div')
+    threeTableBlock.id = 'three-table-block'
+    threeTableBlock.style.left = '92px'
+    threeTableBlock.style.bottom = '640px'
+    threeTableBlock.style.width = '60px'
+    threeTableBlock.style.height = '165px'
+    threeTableBlock.style.background = 'black'
+    threeTableBlock.style.opacity = '0.5'
+    threeTableBlock.style.position = 'absolute'
+    blockParent.appendChild(threeTableBlock)
+
+    twoTableBlock = document.createElement('div')
+    twoTableBlock.id = 'two-table-block'
+    twoTableBlock.style.left = '152px'
+    twoTableBlock.style.bottom = '280px'
+    twoTableBlock.style.width = '60px'
+    twoTableBlock.style.height = '108px'
+    twoTableBlock.style.background = 'black'
+    twoTableBlock.style.opacity = '0.5'
+    twoTableBlock.style.position = 'absolute'
+    blockParent.appendChild(twoTableBlock)
+
+    chairOneBlock = document.createElement('div')
+    chairOneBlock.id = 'chair-one-block'
+    chairOneBlock.style.left = '360px'
+    chairOneBlock.style.bottom = '395px'
+    chairOneBlock.style.width = '150px'
+    chairOneBlock.style.height = '30px'
+    chairOneBlock.style.background = 'black'
+    chairOneBlock.style.opacity = '0.5'
+    chairOneBlock.style.position = 'absolute'
+    blockParent.appendChild(chairOneBlock)
+
+    chairTwoBlock = document.createElement('div')
+    chairTwoBlock.id = 'chair-two-block'
+    chairTwoBlock.style.left = '336px'
+    chairTwoBlock.style.bottom = '372px'
+    chairTwoBlock.style.width = '150px'
+    chairTwoBlock.style.height = '30px'
+    chairTwoBlock.style.background = 'black'
+    chairTwoBlock.style.opacity = '0.5'
+    chairTwoBlock.style.position = 'absolute'
+    blockParent.appendChild(chairTwoBlock)
+
+    chairThreeBlock = document.createElement('div')
+    chairThreeBlock.id = 'chair-three-block'
+    chairThreeBlock.style.left = '306px'
+    chairThreeBlock.style.bottom = '340px'
+    chairThreeBlock.style.width = '150px'
+    chairThreeBlock.style.height = '30px'
+    chairThreeBlock.style.background = 'black'
+    chairThreeBlock.style.opacity = '0.5'
+    chairThreeBlock.style.position = 'absolute'
+    blockParent.appendChild(chairThreeBlock)
+
+    chairFourBlock = document.createElement('div')
+    chairFourBlock.id = 'chair-four-block'
+    chairFourBlock.style.left = '276px'
+    chairFourBlock.style.bottom = '312px'
+    chairFourBlock.style.width = '150px'
+    chairFourBlock.style.height = '30px'
+    chairFourBlock.style.background = 'black'
+    chairFourBlock.style.opacity = '0.5'
+    chairFourBlock.style.position = 'absolute'
+    blockParent.appendChild(chairFourBlock)
+
+    chairFiveBlock = document.createElement('div')
+    chairFiveBlock.id = 'chair-five-block'
+    chairFiveBlock.style.left = '246px'
+    chairFiveBlock.style.bottom = '284px'
+    chairFiveBlock.style.width = '150px'
+    chairFiveBlock.style.height = '30px'
+    chairFiveBlock.style.background = 'black'
+    chairFiveBlock.style.opacity = '0.5'
+    chairFiveBlock.style.position = 'absolute'
+    blockParent.appendChild(chairFiveBlock)
+
+    barrelBlock = document.createElement('div')
+    barrelBlock.id = 'barrel-block'
+    barrelBlock.style.left = '60px'
+    barrelBlock.style.bottom = '820px'
+    barrelBlock.style.width = '30px'
+    barrelBlock.style.height = '30px'
+    barrelBlock.style.background = 'black'
+    barrelBlock.style.opacity = '0.5'
+    barrelBlock.style.position = 'absolute'
+    blockParent.appendChild(barrelBlock)
+
+    stairBlock = document.createElement('div')
+    stairBlock.id = 'stair-block'
+    stairBlock.style.left = '770px'
+    stairBlock.style.bottom = '700px'
+    stairBlock.style.width = '120px'
+    stairBlock.style.height = '140px'
+    stairBlock.style.background = 'black'
+    stairBlock.style.opacity = '0.5'
+    stairBlock.style.position = 'absolute'
+    blockParent.appendChild(stairBlock)
+
+    fountainBlock = document.createElement('div')
+    fountainBlock.id = 'fountain-block'
+    fountainBlock.style.left = '755px'
+    fountainBlock.style.bottom = '180px'
+    fountainBlock.style.width = '120px'
+    fountainBlock.style.height = '140px'
+    fountainBlock.style.background = 'black'
+    fountainBlock.style.opacity = '0.5'
+    fountainBlock.style.position = 'absolute'
+    blockParent.appendChild(fountainBlock)
 
     newImg = document.createElement('img')
     newImg.id = 'characterSprite'
