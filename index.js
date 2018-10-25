@@ -1,24 +1,26 @@
 
 let level
+let speed
 let character
-let monster
+let monsterObj
+let allItems
 let sprite
 let spriteLeftEdge
 let spriteBottomEdge
 let spriteTopEdge
 let spriteRightEdge
 let tID
+let mID
 let blockArray
 let blockParent
+let itemDiv
+let itemArray
 
 let projectileArray = []
 let monstersArray = []
+let monstersProjectilArray = []
 let lastArrowKey = 'left'
 let gameInterval
-
-// if (gameInterval === null) {
-//   startGame()
-// }
 
   document.addEventListener("DOMContentLoaded", () => {
 
@@ -26,11 +28,11 @@ let gameInterval
     const gameHeader = document.getElementById('gameHeader')
     const gameStats = document.getElementById('gameStats')
     blockParent = document.querySelector('.block')
+    itemDiv = document.querySelector('.item')
     // const sprite = document.getElementById('sprite')
     gameInterval = 1
-    let speed = 20
-    // const sprite = document.getElementById('sprite')
-    // these fetches are for level 1
+    speed = 20
+
     fetch('http://localhost:3000/api/v1/levels/1')
     .then(response => response.json())
     .then(parsed => {
@@ -43,9 +45,10 @@ let gameInterval
     .then(response => response.json())
     .then(parsedResponse => {
       console.log(parsedResponse)
-      monster = parsedResponse
+      monsterObj = parsedResponse
       renderMonster(parsedResponse)
-      return monster
+      //animateMonster(parsedResponse)
+      return monsterObj
     })
 
     fetch('http://localhost:3000/api/v1/characters/1')
@@ -53,6 +56,7 @@ let gameInterval
     .then(responseJson => {
       console.log(responseJson)
       character = responseJson
+      restoreHealth()
       displayGameStats(responseJson)
       sprite = document.getElementById('characterSprite')
       spriteLeftEdge = positionToInteger(sprite.style.left)
@@ -62,17 +66,239 @@ let gameInterval
       return character
     })
 
+    fetch('http://localhost:3000/api/v1/items')
+    .then(response => response.json())
+    .then(parsed => {
+      console.log(parsed)
+      levelOneItems = parsed.filter(item => {
+        return item.level_id === 1
+      })
+      makeHTMLForItem(levelOneItems)
+    })
 
-    // function displayImg() {
-      //   let newImg = document.createElement('img')
-      //   newImg.id = 'characterSprite'
-      //   newImg.src = character.sprite_img
-      //   newImg.style.left = '100px'
-      //   newImg.style.bottom = '300px'
-      //   gameBorder.appendChild(newImg)
-      // }
+    function restoreHealth() {
+      fetch('http://localhost:3000/api/v1/characters/1', {
+        'method': 'PATCH',
+        'headers': {
+          'Content-Type': 'application/json',
+          Accept: 'application/json'
+        },
+        'body': JSON.stringify({
+          'health': 100
+        })
+      })
+      .then(response => response.json())
+      .then(json => console.log(json))
+    }
+    function decreaseMonsterHealth(monsterObj, monster) {
+      if (monsterObj.health > 0) {
+        fetch('http://localhost:3000/api/v1/monsters/1', {
+          'method': 'PATCH',
+          'headers': {
+            'Content-Type': 'application/json',
+            Accept: 'application/json'
+          },
+          'body': JSON.stringify({
+            'health': monsterObj.health -= 10
+          })
+        })
+        .then(response => response.json())
+        .then(json => console.log(json))
+      } else {
+        monster.remove()
+        monstersArray.pop()
+        window.alert('You defeated the monster and passed Mod 1! Congratulations!')
+        window.location.reload(true)
+      }
+    }
+
+    function decreaseHealth(character) {
+      if (character.health > 20) {
+        fetch('http://localhost:3000/api/v1/characters/1', {
+          'method': 'PATCH',
+          'headers': {
+            'Content-Type': 'application/json',
+            Accept: 'application/json'
+          },
+          'body': JSON.stringify({
+            'health': character.health -= 20
+          })
+        })
+        .then(response => response.json())
+        .then(json => {
+          console.log(json)
+          newHealthH2.innerText = `Health: ${character.health}`
+        })
+      } else {
+        gameInterval = null
+        window.alert('You died!')
+        window.location.reload(true)
+      }
+    }
+
+    function decreaseCandyHealth(item) {
+      if (item.id === 'Candy') {
+        if (character.health > 0) {
+          fetch('http://localhost:3000/api/v1/characters/1', {
+            'method': 'PATCH',
+            'headers': {
+              'Content-Type': 'application/json',
+              Accept: 'application/json'
+            },
+            'body': JSON.stringify({
+              'health': character.health -= 20
+            })
+          })
+          .then(response => response.json())
+          .then(json => {
+            console.log(json)
+            newHealthH2.innerText = `Health: ${character.health}`
+          })
+        } else {
+          gameInterval = null
+          window.alert('You died!')
+          window.location.reload(true)
+        }
+      }
+    }
+
+    function increaseHealth(item) {
+        if (item.id === 'Coffee') {
+          if (character.health < 100) {
+            fetch('http://localhost:3000/api/v1/characters/1', {
+              'method': 'PATCH',
+              'headers': {
+                'Content-Type': 'application/json',
+                Accept: 'application/json'
+              },
+              'body': JSON.stringify({
+                'health': character.health += 10
+              })
+            })
+            .then(response => response.json())
+            .then(json => {
+              console.log(json)
+              newHealthH2.innerText = `Health: ${character.health}`
+            })
+          } else {
+            window.alert('Your health is already maxed out! You just wasted an item.')
+          }
+        }
+        if (item.id === 'Sleep') {
+          if (character.health < 100) {
+            fetch('http://localhost:3000/api/v1/characters/1', {
+              'method': 'PATCH',
+              'headers': {
+                'Content-Type': 'application/json',
+                Accept: 'application/json'
+              },
+              'body': JSON.stringify({
+                'health': character.health += 10
+              })
+            })
+            .then(response => response.json())
+            .then(json => {
+              console.log(json)
+              newHealthH2.innerText = `Health: ${character.health}`
+            })
+          } else {
+            window.alert('Your health is already maxed out! You just wasted an item.')
+          }
+        }
+        if (item.id === 'Beer') {
+          if (character.health < 100) {
+            fetch('http://localhost:3000/api/v1/characters/1', {
+              'method': 'PATCH',
+              'headers': {
+                'Content-Type': 'application/json',
+                Accept: 'application/json'
+              },
+              'body': JSON.stringify({
+                'health': character.health += 5
+              })
+            })
+            .then(response => response.json())
+            .then(json => {
+              console.log(json)
+              newHealthH2.innerText = `Health: ${character.health}`
+            })
+          } else {
+            window.alert('Your health is already maxed out! You just wasted an item.')
+          }
+        }
+    }
+
+    let biggerProjectile = false
+
+    function increaseProjectileSize(item) {
+      if (item.id === 'Walks') {
+        biggerProjectile = true
+      }
+    }
+
+    function makeHTMLForItem(levelOneItems) {
+      levelOneItems.forEach(item => {
+        if (item.name === "Coffee"){
+          coffeeImg = document.createElement('img')
+          coffeeImg.src = item.sprite_img
+          coffeeImg.id = 'Coffee'
+          coffeeImg.style.height = '30px'
+          coffeeImg.style.width = '30px'
+          coffeeImg.style.left = '100px'
+          coffeeImg.style.bottom = '560px'
+          coffeeImg.style.position = 'absolute'
+          itemDiv.appendChild(coffeeImg)
+        }
+        if (item.name === "Beer"){
+          beerImg = document.createElement('img')
+          beerImg.src = item.sprite_img
+          beerImg.id = 'Beer'
+          beerImg.style.height = '30px'
+          beerImg.style.width = '30px'
+          beerImg.style.left = '800px'
+          beerImg.style.bottom = '350px'
+          beerImg.style.position = 'absolute'
+          itemDiv.appendChild(beerImg)
+        }
+        if (item.name === "Candy"){
+          candyImg = document.createElement('img')
+          candyImg.src = item.sprite_img
+          candyImg.id = 'Candy'
+          candyImg.style.height = '30px'
+          candyImg.style.width = '30px'
+          candyImg.style.left = '500px'
+          candyImg.style.bottom = '800px'
+          candyImg.style.position = 'absolute'
+          itemDiv.appendChild(candyImg)
+        }
+        if (item.name === "Sleep"){
+          sleepImg = document.createElement('img')
+          sleepImg.src = item.sprite_img
+          sleepImg.id = 'Sleep'
+          sleepImg.style.height = '30px'
+          sleepImg.style.width = '30px'
+          sleepImg.style.left = '100px'
+          sleepImg.style.bottom = '475px'
+          sleepImg.style.position = 'absolute'
+          itemDiv.appendChild(sleepImg)
+        }
+        if (item.name === "Walks"){
+          walksImg = document.createElement('img')
+          walksImg.src = item.sprite_img
+          walksImg.id = 'Walks'
+          walksImg.style.height = '30px'
+          walksImg.style.width = '30px'
+          walksImg.style.left = '800px'
+          walksImg.style.bottom = '650px'
+          walksImg.style.position = 'absolute'
+          itemDiv.appendChild(walksImg)
+        }
+      })
+      itemArray = itemDiv.children
+    }
 
       function displayGameStats(response) {
+        setInterval(fireMonsterProjectile, 855)
         newName = document.createElement('div')
         newName.style.minWidth = '333px'
         newName.style.marginLeft = '75px'
@@ -91,7 +317,7 @@ let gameInterval
         newWeapon = document.createElement('div')
         newWeapon.style.minWidth = '333px'
         newWeaponH2 = document.createElement('h2')
-        newWeaponH2.innerText = 'weapons array'
+        newWeaponH2.innerText = 'Weapon: Projectiles'
         gameStats.appendChild(newWeapon)
         newWeapon.appendChild(newWeaponH2)
 
@@ -102,7 +328,7 @@ let gameInterval
         threeTableBlock.style.width = '60px'
         threeTableBlock.style.height = '165px'
         threeTableBlock.style.background = 'black'
-        threeTableBlock.style.opacity = '0.5'
+        threeTableBlock.style.opacity = '0'
         threeTableBlock.style.position = 'absolute'
         blockParent.appendChild(threeTableBlock)
 
@@ -113,7 +339,7 @@ let gameInterval
         twoTableBlock.style.width = '60px'
         twoTableBlock.style.height = '108px'
         twoTableBlock.style.background = 'black'
-        twoTableBlock.style.opacity = '0.5'
+        twoTableBlock.style.opacity = '0'
         twoTableBlock.style.position = 'absolute'
         blockParent.appendChild(twoTableBlock)
 
@@ -124,7 +350,7 @@ let gameInterval
         chairOneBlock.style.width = '150px'
         chairOneBlock.style.height = '30px'
         chairOneBlock.style.background = 'black'
-        chairOneBlock.style.opacity = '0.5'
+        chairOneBlock.style.opacity = '0'
         chairOneBlock.style.position = 'absolute'
         blockParent.appendChild(chairOneBlock)
 
@@ -135,7 +361,7 @@ let gameInterval
         chairTwoBlock.style.width = '150px'
         chairTwoBlock.style.height = '30px'
         chairTwoBlock.style.background = 'black'
-        chairTwoBlock.style.opacity = '0.5'
+        chairTwoBlock.style.opacity = '0'
         chairTwoBlock.style.position = 'absolute'
         blockParent.appendChild(chairTwoBlock)
 
@@ -146,7 +372,7 @@ let gameInterval
         chairThreeBlock.style.width = '150px'
         chairThreeBlock.style.height = '30px'
         chairThreeBlock.style.background = 'black'
-        chairThreeBlock.style.opacity = '0.5'
+        chairThreeBlock.style.opacity = '0'
         chairThreeBlock.style.position = 'absolute'
         blockParent.appendChild(chairThreeBlock)
 
@@ -157,7 +383,7 @@ let gameInterval
         chairFourBlock.style.width = '150px'
         chairFourBlock.style.height = '30px'
         chairFourBlock.style.background = 'black'
-        chairFourBlock.style.opacity = '0.5'
+        chairFourBlock.style.opacity = '0'
         chairFourBlock.style.position = 'absolute'
         blockParent.appendChild(chairFourBlock)
 
@@ -168,7 +394,7 @@ let gameInterval
         chairFiveBlock.style.width = '150px'
         chairFiveBlock.style.height = '30px'
         chairFiveBlock.style.background = 'black'
-        chairFiveBlock.style.opacity = '0.5'
+        chairFiveBlock.style.opacity = '0'
         chairFiveBlock.style.position = 'absolute'
         blockParent.appendChild(chairFiveBlock)
 
@@ -179,7 +405,7 @@ let gameInterval
         barrelBlock.style.width = '30px'
         barrelBlock.style.height = '30px'
         barrelBlock.style.background = 'black'
-        barrelBlock.style.opacity = '0.5'
+        barrelBlock.style.opacity = '0'
         barrelBlock.style.position = 'absolute'
         blockParent.appendChild(barrelBlock)
 
@@ -190,7 +416,7 @@ let gameInterval
         stairBlock.style.width = '120px'
         stairBlock.style.height = '140px'
         stairBlock.style.background = 'black'
-        stairBlock.style.opacity = '0.5'
+        stairBlock.style.opacity = '0'
         stairBlock.style.position = 'absolute'
         blockParent.appendChild(stairBlock)
 
@@ -201,7 +427,7 @@ let gameInterval
         fountainBlock.style.width = '120px'
         fountainBlock.style.height = '140px'
         fountainBlock.style.background = 'black'
-        fountainBlock.style.opacity = '0.5'
+        fountainBlock.style.opacity = '0'
         fountainBlock.style.position = 'absolute'
         blockParent.appendChild(fountainBlock)
 
@@ -212,7 +438,7 @@ let gameInterval
         middleBlock.style.width = '750px'
         middleBlock.style.height = '30px'
         middleBlock.style.background = 'white'
-        middleBlock.style.opacity = '0.5'
+        middleBlock.style.opacity = '0'
         middleBlock.style.position = 'absolute'
         blockParent.appendChild(middleBlock)
 
@@ -223,7 +449,7 @@ let gameInterval
         lowerBlock.style.width = '750px'
         lowerBlock.style.height = '45px'
         lowerBlock.style.background = 'white'
-        lowerBlock.style.opacity = '0.5'
+        lowerBlock.style.opacity = '0'
         lowerBlock.style.position = 'absolute'
         blockParent.appendChild(lowerBlock)
 
@@ -234,48 +460,38 @@ let gameInterval
         startingBlock.style.width = '90px'
         startingBlock.style.height = '120px'
         startingBlock.style.background = 'white'
-        startingBlock.style.opacity = '0.5'
+        startingBlock.style.opacity = '0'
         startingBlock.style.position = 'absolute'
         blockParent.appendChild(startingBlock)
 
         newImg = document.createElement('img')
         newImg.id = 'characterSprite'
-        // newImg.src = character.sprite_img
         newImg.style.background =  `url("${character.sprite_img}") 0px 0px`
+        newImg.style.border = 'none !important'
         newImg.style.left = '740px'
         newImg.style.bottom = '80px'
         newImg.style.width = '60px'
         newImg.style.height = '38px'
         newImg.style.position = 'absolute'
         newImg.style.backgroundSize = 'auto'
-        // newImg.style.clip = 'rect(20px, 200px,200px,0px)'
         gameBorder.appendChild(newImg)
         blockArray = blockParent.children
       }
 
-      function renderMonster(monster) {
+      function renderMonster(monsterObj) {
         newMonster = document.createElement('img')
         newMonster.id = 'monsterSprite'
-        newMonster.style.background = `url("${monster.sprite_img}") 0px 0px`
+        newMonster.style.background = `url("${monsterObj.sprite_img}") 0px 0px`
         newMonster.style.left = '200px'
         newMonster.style.bottom = '650px'
-        newMonster.style.width = '100px'
-        newMonster.style.height = '90px'
+        newMonster.style.width = '80px'
+        newMonster.style.height = '80px'
         newMonster.style.position = 'absolute'
         gameBorder.appendChild(newMonster)
+        monstersArray.push(newMonster)
+        animateMonster(newMonster)
       }
 
-      //debugger
-      // debugger
-      // sprite = document.getElementById('characterSprite')
-      // // debugger
-      // spriteLeftEdge = positionToInteger(sprite.style.left)
-      // spriteBottomEdge = positionToInteger(sprite.style.bottom)
-      // spriteTopEdge = spriteBottomEdge + 40
-      // spriteRightEdge = spriteLeftEdge + 50
-      // let speed = 10
-      // let gameInterval = 1
-      //debugger
       function animateScript() {
         let position = 60
         const interval = 100
@@ -292,8 +508,21 @@ let gameInterval
         }, interval)
       }
 
-      function animateMonster() {
+
+      function animateMonster(monster) {
         let position = 80
+        const interval = 150
+        const diff = 80
+
+        mID = setInterval(() => {
+          monster.style.backgroundPosition =
+          `-${position}px 0px`
+          if (position < 794) {
+            position = position + diff
+          } else {
+            position = 80
+          }
+        }, interval)
       }
 
       let canMove = true
@@ -307,6 +536,7 @@ let gameInterval
           if (canMove) {
             lastArrowKey = 'left'
             checkBlockCollision(blockArray)
+            checkItemCollision(itemArray, levelOneItems, speed)
             moveSpriteLeft()
             animateScript()
             break;
@@ -315,6 +545,7 @@ let gameInterval
           if (canMove) {
             lastArrowKey = 'up'
             checkBlockCollision(blockArray)
+            checkItemCollision(itemArray, levelOneItems, speed)
             moveSpriteUp()
             animateScript()
             break;
@@ -323,6 +554,7 @@ let gameInterval
           if (canMove) {
             lastArrowKey = 'right'
             checkBlockCollision(blockArray)
+            checkItemCollision(itemArray, levelOneItems, speed)
             moveSpriteRight()
             animateScript()
             break;
@@ -331,6 +563,7 @@ let gameInterval
           if (canMove) {
             lastArrowKey = 'down'
             checkBlockCollision(blockArray)
+            checkItemCollision(itemArray, levelOneItems, speed)
             moveSpriteDown()
             animateScript()
             break;
@@ -343,37 +576,125 @@ let gameInterval
           console.log('DEFAULT');
         }
       }) //end of keydown event listener
-      // debugger
+
+      fireMonsterProjectile = () => {
+        if (monstersArray.length > 0) {
+          let monsterDiv = monstersArray[0]
+          let projectileMonster = document.createElement('div')
+          let left = positionToInteger(monsterDiv.style.left)
+          let bottom = positionToInteger(monsterDiv.style.bottom)
+          left = left +  Math.floor(Math.random() * 60)
+          bottom = bottom +  Math.floor(Math.random() * 60)
+          projectileMonster.className = 'projectile'
+          projectileMonster.style.left = `${left + 24}px`
+          projectileMonster.style.bottom = `${bottom + 20}px`
+          gameBorder.appendChild(projectileMonster)
+          monstersProjectilArray.push(projectileMonster)
+          let direction = Math.floor(Math.random() * 3)
+          // let direction = 0
+          if (direction === 0){
+            moveMonsterProjectile = () => {
+              let currentBottom = parseInt(projectileMonster.style.bottom)
+              projectileMonster.style.bottom = `${currentBottom -= 45}px`
+              if (checkMonsterBulletHitUpDown(projectileMonster) === 'hit') {
+                return endGame()
+              }
+              if (currentBottom > 65) {
+                window.requestAnimationFrame(moveMonsterProjectile)
+              } else {
+                projectileMonster.remove()
+                monstersProjectilArray.pop()
+              }
+            }
+            window.requestAnimationFrame(moveMonsterProjectile)
+            // debugger
+          }
+          if (direction === 1){
+            moveMonsterProjectile = () => {
+              let currentLeft = parseInt(projectileMonster.style.left)
+              projectileMonster.style.left = `${currentLeft += 45}px`
+              if (checkMonsterBulletHitLeftRight(projectileMonster) === 'hit') {
+                return endGame()
+              }
+              if (currentLeft < 860) {
+                window.requestAnimationFrame(moveMonsterProjectile)
+              } else {
+                projectileMonster.remove()
+                monstersProjectilArray.pop()
+              }
+            }
+            window.requestAnimationFrame(moveMonsterProjectile)
+          }
+          if (direction === 2){
+            moveMonsterProjectile = () => {
+              let currentLeft = parseInt(projectileMonster.style.left)
+              //debugger
+              let currentBottom = parseInt(projectileMonster.style.bottom)
+              projectileMonster.style.left = `${currentLeft += 45}px`
+              projectileMonster.style.bottom = `${currentBottom -= 45}px`
+              if (checkMonsterBulletHitUpDown(projectileMonster) === 'hit') {
+                return endGame()
+              }
+              if (currentLeft < 860) {
+                window.requestAnimationFrame(moveMonsterProjectile)
+              } else {
+                projectileMonster.remove()
+                monstersProjectilArray.pop()
+              }
+            }
+            window.requestAnimationFrame(moveMonsterProjectile)
+          }
+        }
+      }
+
+      checkMonsterBulletHitUpDown = (projectileMonster) => {
+          let proYaxis = monstersProjectilArray[0].style.bottom
+          let proXaxis = monstersProjectilArray[0].style.left
+          if (parseInt(proYaxis) < parseInt(sprite.style.bottom) + 30 && parseInt(sprite.style.bottom) < parseInt(proYaxis)) {
+            if (parseInt(sprite.style.left) > parseInt(proXaxis) + 10 || parseInt(sprite.style.left) + 30 < parseInt(proXaxis)) {
+              console.log('miss');
+            } else {
+              console.log('hit')
+              monstersProjectilArray.pop()
+              decreaseHealth(character)
+            }
+          }
+        }
+
+        checkMonsterBulletHitLeftRight = () => {
+            let proYaxis = monstersProjectilArray[0].style.bottom
+            let proXaxis = monstersProjectilArray[0].style.left
+            if  (parseInt(proXaxis) < parseInt(sprite.style.left) + 40 && parseInt(sprite.style.left) < parseInt(proXaxis) + 50)
+            {
+              if (parseInt(sprite.style.bottom) > parseInt(proYaxis) + 10 || parseInt(sprite.style.bottom) + 30 < parseInt(proYaxis))
+              {
+                console.log('miss');
+              } else {
+                console.log('hit')
+                monstersProjectilArray.pop()
+                decreaseHealth(character)
+              }
+            }
+          }
+
       function moveSpriteLeft() {
-        // let sprite = document.getElementById('spriteCharacter')
-        // let spriteBottomEdge = positionToInteger(sprite.style.bottom)
-        // let spriteLeftEdge = positionToInteger(sprite.style.left)
-        // let spriteTopEdge = spriteBottomEdge + 100
-        // let spriteRightEdge = spriteLeftEdge + 50
+
         function moveLeft() {
           sprite.style.left = `${spriteLeftEdge - speed}px`
+          console.log(speed)
           spriteBottomEdge = positionToInteger(sprite.style.bottom)
           spriteLeftEdge = positionToInteger(sprite.style.left)
           spriteTopEdge = spriteBottomEdge + positionToInteger(sprite.style.height)
           spriteRightEdge = spriteLeftEdge + positionToInteger(sprite.style.width)
         }
         if (gameInterval !== null && spriteLeftEdge > 50) {
-          // if (checkCollision(spriteTopEdge, spriteRightEdge) !== 'stop LEFT') {
-            // animateScript()
             window.requestAnimationFrame(moveLeft)
-            // stopAnimate()
-            // }
           }
           canMove = false
         }
         //
         //
         function moveSpriteRight() {
-          // let sprite = document.getElementById('spriteCharacter')
-          // let spriteBottomEdge = positionToInteger(sprite.style.bottom)
-          // let spriteLeftEdge = positionToInteger(sprite.style.left)
-          // let spriteTopEdge = spriteBottomEdge + 100
-          // let spriteRightEdge = spriteLeftEdge + 50
 
           function moveRight() {
             sprite.style.left = `${spriteLeftEdge + speed}px`
@@ -383,25 +704,14 @@ let gameInterval
             spriteRightEdge = spriteLeftEdge + positionToInteger(sprite.style.width)
           }
           if (gameInterval !== null && spriteLeftEdge < 790) {
-            // debugger
-            // if ((spriteRightEdge < blockLeftEdge && spriteTopEdge < blockBottomEdge) || (spriteRightEdge < blockLeftEdge && spriteBottomEdge > blockTopEdge)) {
-              // if (checkCollision(spriteTopEdge, spriteRightEdge) !== 'stop RIGHT'){
-                // animateScript()
+
                 window.requestAnimationFrame(moveRight)
-                // stopAnimate()
-                // } else {
-                  //   console.log('wtf');
-                  // }
+
                 }
                 canMove = false
               }
 
               function moveSpriteUp() {
-                // let sprite = document.getElementById('spriteCharacter')
-                // let spriteBottomEdge = positionToInteger(sprite.style.bottom)
-                // let spriteLeftEdge = positionToInteger(sprite.style.left)
-                // let spriteTopEdge = spriteBottomEdge + 100
-                // let spriteRightEdge = spriteLeftEdge + 50
 
                 function moveUp() {
                   sprite.style.bottom = `${spriteBottomEdge + speed}px`
@@ -411,21 +721,12 @@ let gameInterval
                   spriteRightEdge = spriteLeftEdge + positionToInteger(sprite.style.width)
                 }
                 if (gameInterval !== null && spriteBottomEdge < 820) {
-                  // if (checkCollision(spriteTopEdge, spriteRightEdge) !== 'stop UP'){
-                    // animateScript()
                     window.requestAnimationFrame(moveUp)
-                    // stopAnimate()
-                    // }
                   }
                   canMove = false
                 }
                 //
                 function moveSpriteDown() {
-                  // let sprite = document.getElementById('spriteCharacter')
-                  // let spriteBottomEdge = positionToInteger(sprite.style.bottom)
-                  // let spriteLeftEdge = positionToInteger(sprite.style.left)
-                  // let spriteTopEdge = spriteBottomEdge + 100
-                  // let spriteRightEdge = spriteLeftEdge + 50
 
                   function moveDown(){
                     sprite.style.bottom = `${spriteBottomEdge - speed}px`
@@ -470,6 +771,11 @@ let gameInterval
                       projectile.style.left = `${left + 24}px`
                       projectile.style.bottom = `${bottom + 20}px`
                       gameBorder.appendChild(projectile)
+                      // let projectileStyle = getComputedStyle(projectile)
+                      if (biggerProjectile) {
+                        projectile.style.width = '25px'
+                        projectile.style.height = '25px'
+                        }
                       // debugger
 
                       if (lastArrowKey === 'up') {
@@ -539,20 +845,17 @@ let gameInterval
                         }
                       }
 
-
-
-
                       window.requestAnimationFrame(moveProjectile)
                       projectileArray.push(projectile)
                       // return projectile
                     }
                   }
 
-                  checkForBulletHitUpDown = () => {
+                  checkForBulletHitUpDown = (projectile) => {
                     // debugger
                     if (monstersArray.length > 0){
-                      monstersArray.forEach(monster => {
-                        let monsterStyle = getComputedStyle(monster)
+                      monstersArray.forEach(monsterEl => {
+                        let monsterStyle = getComputedStyle(monsterEl)
                         let proYaxis = projectileArray[0].style.bottom
                         let proXaxis = projectileArray[0].style.left
                         if (parseInt(proYaxis) < parseInt(monsterStyle.bottom) && parseInt(monsterStyle.bottom) < parseInt(proYaxis) + 50){
@@ -563,7 +866,7 @@ let gameInterval
                             console.log('hit')
                             projectileArray[0].remove()
                             projectileArray.pop()
-                            monster.remove()
+                            decreaseMonsterHealth(monsterObj, monsterEl)
                           }
                         }
                       })
@@ -573,8 +876,8 @@ let gameInterval
                   checkForBulletHitLeftRight = () => {
                     // debugger
                     if (monstersArray.length > 0){
-                      monstersArray.forEach(monster => {
-                        let monsterStyle = getComputedStyle(monster)
+                      monstersArray.forEach(monsterEl => {
+                        let monsterStyle = getComputedStyle(monsterEl)
                         let proYaxis = projectileArray[0].style.bottom
                         let proXaxis = projectileArray[0].style.left
                         if (parseInt(proXaxis) < parseInt(monsterStyle.left) && parseInt(monsterStyle.left) < parseInt(proXaxis) + 50){
@@ -585,7 +888,7 @@ let gameInterval
                             console.log('hit')
                             projectileArray[0].remove()
                             projectileArray.pop()
-                            monster.remove()
+                            decreaseMonsterHealth(monsterObj, monsterEl)
                           }
                         }
                       })
@@ -605,9 +908,31 @@ let gameInterval
                         spriteBottomEdge < blockTopEdge &&
                         spriteTopEdge > blockBottomEdge) {
                           gameInterval = null
-                          window.alert('You died! Refresh the page.')
-                          return 'stop'
+                          window.alert('You died!')
+                          window.location.reload(true)
                         }
                       })
+                    }
+
+                    function checkItemCollision(itemArray, levelOneItems, speed) {
+                      let array = Array.from(itemArray)
+                      array.forEach(item => {
+                        let itemLeftEdge = positionToInteger(item.style.left)
+                        let itemBottomEdge = positionToInteger(item.style.bottom)
+                        let itemRightEdge = itemLeftEdge + positionToInteger(item.style.width)
+                        let itemTopEdge = itemBottomEdge + positionToInteger(item.style.height)
+                        if (spriteLeftEdge < itemRightEdge &&
+                          spriteRightEdge > itemLeftEdge &&
+                          spriteBottomEdge < itemTopEdge &&
+                          spriteTopEdge > itemBottomEdge) {
+                            console.log('hit');
+                            selectedItem = levelOneItems.find(itemObj => itemObj.name === item.id)
+                            item.remove()
+                            window.alert(`${selectedItem.ability}`)
+                            decreaseCandyHealth(item)
+                            increaseHealth(item)
+                            increaseProjectileSize(item)
+                          }
+                        })
                     }
                 }) //end of event listener

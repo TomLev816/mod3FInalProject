@@ -16,7 +16,7 @@ class Api::V1::MonstersController < ApplicationController
 
   def create
     @monster = Monster.create(monster_params)
-    render(json: @monster, status: :ok)
+    render(json: @monster, status: :created)
   end
 
   # def edit
@@ -24,7 +24,8 @@ class Api::V1::MonstersController < ApplicationController
   # end
 
   def update
-
+    find_monster
+    render(json: @monster, status: :accepted)
   end
 
   def destroy

@@ -52,6 +52,6 @@
   width: 10px;
   height: 10px;
   background: yellow;
-  radius: 50%;
+  border-radius: 50%;
   position: absolute;
 }

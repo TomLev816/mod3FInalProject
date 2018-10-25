@@ -17,7 +17,7 @@ class Api::V1::CharactersController < ApplicationController
 
   def create
     @character = Character.create(character_params)
-    render(json: @character, status: :ok)
+    render(json: @character, status: :created)
   end
 
   # def edit
@@ -25,7 +25,8 @@ class Api::V1::CharactersController < ApplicationController
   # end
 
   def update
-
+    find_character
+    render(json: @character, status: :accepted)
   end
 
   def destroy
