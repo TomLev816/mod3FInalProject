@@ -9,8 +9,8 @@ let spriteLeftEdge
 let spriteBottomEdge
 let spriteTopEdge
 let spriteRightEdge
-let tID
-let mID
+// let tID
+// let mID
 let blockArray
 let blockParent
 let itemDiv
@@ -31,7 +31,7 @@ let gameInterval
     itemDiv = document.querySelector('.item')
     // const sprite = document.getElementById('sprite')
     gameInterval = 1
-    speed = 20
+    speed = 10
 
     fetch('http://localhost:3000/api/v1/levels/1')
     .then(response => response.json())
@@ -301,7 +301,6 @@ let gameInterval
         setInterval(fireMonsterProjectile, 855)
         newName = document.createElement('div')
         newName.style.minWidth = '333px'
-        newName.style.marginLeft = '75px'
         newNameH2 = document.createElement('h2')
         newNameH2.innerText = `Name: ${character.name}`
         gameStats.appendChild(newName)
@@ -466,7 +465,7 @@ let gameInterval
 
         newImg = document.createElement('img')
         newImg.id = 'characterSprite'
-        newImg.style.background =  `url("${character.sprite_img}") 0px 0px`
+        newImg.src = character.sprite_img
         newImg.style.border = 'none !important'
         newImg.style.left = '740px'
         newImg.style.bottom = '80px'
@@ -481,7 +480,7 @@ let gameInterval
       function renderMonster(monsterObj) {
         newMonster = document.createElement('img')
         newMonster.id = 'monsterSprite'
-        newMonster.style.background = `url("${monsterObj.sprite_img}") 0px 0px`
+        newMonster.src = monsterObj.sprite_img
         newMonster.style.left = '200px'
         newMonster.style.bottom = '650px'
         newMonster.style.width = '80px'
@@ -489,41 +488,41 @@ let gameInterval
         newMonster.style.position = 'absolute'
         gameBorder.appendChild(newMonster)
         monstersArray.push(newMonster)
-        animateMonster(newMonster)
+        // animateMonster(newMonster)
       }
 
-      function animateScript() {
-        let position = 60
-        const interval = 100
-        const diff = 60
+      // function animateScript() {
+      //   let position = 60
+      //   const interval = 100
+      //   const diff = 60
+      //
+      //   tID = setInterval (() => {
+      //     sprite.style.backgroundPosition =
+      //     `-${position}px 0px`
+      //     if (position < 184) {
+      //       position = position + diff
+      //     } else {
+      //       position = 60
+      //     }
+      //   }, interval)
+      // }
 
-        tID = setInterval (() => {
-          sprite.style.backgroundPosition =
-          `-${position}px 0px`
-          if (position < 184) {
-            position = position + diff
-          } else {
-            position = 60
-          }
-        }, interval)
-      }
 
-
-      function animateMonster(monster) {
-        let position = 80
-        const interval = 150
-        const diff = 80
-
-        mID = setInterval(() => {
-          monster.style.backgroundPosition =
-          `-${position}px 0px`
-          if (position < 794) {
-            position = position + diff
-          } else {
-            position = 80
-          }
-        }, interval)
-      }
+      // function animateMonster(monster) {
+      //   let position = 80
+      //   const interval = 150
+      //   const diff = 80
+      //
+      //   mID = setInterval(() => {
+      //     monster.style.backgroundPosition =
+      //     `-${position}px 0px`
+      //     if (position < 794) {
+      //       position = position + diff
+      //     } else {
+      //       position = 80
+      //     }
+      //   }, interval)
+      // }
 
       let canMove = true
 
@@ -538,7 +537,7 @@ let gameInterval
             checkBlockCollision(blockArray)
             checkItemCollision(itemArray, levelOneItems, speed)
             moveSpriteLeft()
-            animateScript()
+            // animateScript()
             break;
           }
           case 38:
@@ -547,7 +546,7 @@ let gameInterval
             checkBlockCollision(blockArray)
             checkItemCollision(itemArray, levelOneItems, speed)
             moveSpriteUp()
-            animateScript()
+            // animateScript()
             break;
           }
           case 39:
@@ -556,7 +555,7 @@ let gameInterval
             checkBlockCollision(blockArray)
             checkItemCollision(itemArray, levelOneItems, speed)
             moveSpriteRight()
-            animateScript()
+            // animateScript()
             break;
           }
           case 40:
@@ -565,7 +564,7 @@ let gameInterval
             checkBlockCollision(blockArray)
             checkItemCollision(itemArray, levelOneItems, speed)
             moveSpriteDown()
-            animateScript()
+            // animateScript()
             break;
           }
           case 32:
@@ -588,6 +587,9 @@ let gameInterval
           projectileMonster.className = 'projectile'
           projectileMonster.style.left = `${left + 24}px`
           projectileMonster.style.bottom = `${bottom + 20}px`
+          projectileMonster.style.background = '#00ff00'
+          projectileMonster.style.height = '20px'
+          projectileMonster.style.width = '20px'
           gameBorder.appendChild(projectileMonster)
           monstersProjectilArray.push(projectileMonster)
           let direction = Math.floor(Math.random() * 3)
@@ -690,7 +692,7 @@ let gameInterval
         if (gameInterval !== null && spriteLeftEdge > 50) {
             window.requestAnimationFrame(moveLeft)
           }
-          canMove = false
+          // canMove = false
         }
         //
         //
@@ -708,7 +710,7 @@ let gameInterval
                 window.requestAnimationFrame(moveRight)
 
                 }
-                canMove = false
+                // canMove = false
               }
 
               function moveSpriteUp() {
@@ -723,7 +725,7 @@ let gameInterval
                 if (gameInterval !== null && spriteBottomEdge < 820) {
                     window.requestAnimationFrame(moveUp)
                   }
-                  canMove = false
+                  // canMove = false
                 }
                 //
                 function moveSpriteDown() {
@@ -742,21 +744,21 @@ let gameInterval
                       // stopAnimate()
                       // }
                     }
-                    canMove = false
+                    // canMove = false
                   }
 
                   function positionToInteger(p) {
                     return parseInt(p.split('px')[0]) || 0
                   }
                   //
-                  document.addEventListener('keyup', event => {
-                    stopAnimate()
-                    canMove = true
-                  })
-
-                  function stopAnimate() {
-                    clearInterval(tID);
-                  }
+                  // document.addEventListener('keyup', event => {
+                  //   stopAnimate()
+                  //   canMove = true
+                  // })
+                  //
+                  // function stopAnimate() {
+                  //   clearInterval(tID);
+                  // }
 
 
 

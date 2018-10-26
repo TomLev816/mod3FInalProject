@@ -1,52 +1,56 @@
-/* #characterSprite {
-  height: 50px;
-  width: 50px;
-} */
+body {
+  background-color: #1a1a1a;
+}
 
-/* #sprite {
-  height: 50px;
-  width: 50px;
-  position: absolute;
-} */
-/* * {
-  justify-content: center;
-} */
+.game-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  width: 100vw;
+
+  /* border: 5px solid yellow; */
+}
+
+.game-border-wrapper {
+  position: relative;
+}
 
 #gameBorder {
+
   background-color: white;
-  border: solid black 10px;
+  border: solid #1a1a1a 10px;
   height: 910px;
   width: 910px;
   position: absolute;
-  /* left: 17%; */
-  /* margin-left: -200px; */
+  order: 1;
+
+  /* border: 5px solid red; */
 }
 
-/* #block {
-  background-color: black;
-  height: 40px;
-  width: 50px;
-  position: absolute;
-  bottom: 500px;
-  left: 600px;
-} */
+
 #gameHeader{
-  justify-content: center;
-  /* display: flex; */
-  /* flex-direction: row; */
-  /* flex-wrap: nowrap; */
+  /* display: absolute; */
+
+  color: white;
+  /* order: 2; */
+  /* justify-content: right; */
+
+  /* z-index: 5; */
+
+  /* border: 5px solid blue; */
 }
 
 #gameStats {
-  justify-content: center;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
+  /* display: flex; */
+  color: white;
+  justify-content: left;
+  /* flex-direction: column; */ */
 }
-/* h1 {
-  justify-content: center;
-  display: flex;
-} */
+
+.third-div, .fourth-div {
+  /* border: 5px solid limegreen; */
+}
 
 .projectile {
   width: 10px;
