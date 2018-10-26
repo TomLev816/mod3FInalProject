@@ -657,6 +657,7 @@ let gameInterval
               console.log('miss');
             } else {
               console.log('hit')
+              monstersProjectilArray[0].remove()
               monstersProjectilArray.pop()
               decreaseHealth(character)
             }
@@ -673,6 +674,7 @@ let gameInterval
                 console.log('miss');
               } else {
                 console.log('hit')
+                monstersProjectilArray[0].remove()
                 monstersProjectilArray.pop()
                 decreaseHealth(character)
               }
